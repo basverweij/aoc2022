@@ -20,10 +20,10 @@ foreach (var line in lines)
 
 elves.Sort();
 
-var day1 = elves.Last();
+var puzzle1 = elves.Last();
 
-Console.WriteLine($"Day 1 - Puzzle 1: {day1}");
+Console.WriteLine($"Day 1 - Puzzle 1: {puzzle1}");
 
-var day2 = elves.TakeLast(3).Sum();
+var puzzle2 = elves.TakeLast(3).Sum();
 
-Console.WriteLine($"Day 1 - Puzzle 2: {day2}");
+Console.WriteLine($"Day 1 - Puzzle 2: {puzzle2}");

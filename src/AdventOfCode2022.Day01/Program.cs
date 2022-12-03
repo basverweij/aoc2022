@@ -1,6 +1,6 @@
 ﻿var lines = await File.ReadAllLinesAsync("input.txt");
 
-var maxCalories = 0;
+var elves = new List<int>();
 
 var currentCalories = 0;
 
@@ -8,10 +8,7 @@ foreach (var line in lines)
 {
     if (line == string.Empty)
     {
-        if (currentCalories > maxCalories)
-        {
-            maxCalories = currentCalories;
-        }
+        elves.Add(currentCalories);
 
         currentCalories = 0;
 
@@ -21,4 +18,6 @@ foreach (var line in lines)
     currentCalories += int.Parse(line);
 }
 
-Console.WriteLine($"Day 1 - Puzzle 1: {maxCalories}");
+elves.Sort();
+
+Console.WriteLine($"Day 1 - Puzzle 1: {elves[^1]}");

@@ -8,17 +8,40 @@ var stacks = BuildStacks(
 
 var moves = input.Skip(start.Length + 2).Select(ParseMove).ToArray();
 
-foreach (var move in moves)
+foreach (var (count, from, to) in moves)
 {
-    for (var i = 0; i < move.count; i++)
+    for (var i = 0; i < count; i++)
     {
-        stacks[move.to - 1].Push(stacks[move.from - 1].Pop());
+        stacks[to - 1].Push(stacks[from - 1].Pop());
     }
 }
 
 var puzzle1 = new string(stacks.Select(s => s.Peek()).ToArray());
 
 Console.WriteLine($"Day 5 - Puzzle 1: {puzzle1}");
+
+stacks = BuildStacks(
+    input,
+    start);
+
+foreach (var (count, from, to) in moves)
+{
+    var stack = new Stack<char>(count);
+
+    for (var i = 0; i < count; i++)
+    {
+        stack.Push(stacks[from - 1].Pop());
+    }
+
+    for (var i = 0; i < count; i++)
+    {
+        stacks[to - 1].Push(stack.Pop());
+    }
+}
+
+var puzzle2 = new string(stacks.Select(s => s.Peek()).ToArray());
+
+Console.WriteLine($"Day 5 - Puzzle 2: {puzzle2}");
 
 static Stack<char>[] BuildStacks(string[] input, string[] start)
 {

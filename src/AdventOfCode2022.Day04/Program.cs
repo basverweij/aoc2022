@@ -4,6 +4,10 @@ var puzzle1 = lines.Select(Parse).Select(FullyOverlaps).Sum();
 
 Console.WriteLine($"Day 4 - Puzzle 1: {puzzle1}");
 
+var puzzle2 = lines.Select(Parse).Select(Overlaps).Sum();
+
+Console.WriteLine($"Day 4 - Puzzle 2: {puzzle2}");
+
 static ((int, int), (int, int)) Parse(
     string line)
 {
@@ -22,4 +26,15 @@ static int FullyOverlaps(
         (b.start >= a.start && b.end <= a.end) ?
         1 :
         0;
+}
+
+static int Overlaps(
+    ((int start, int end), (int start, int end)) pair)
+{
+    var (a, b) = pair;
+
+    return
+        (a.end < b.start || a.start > b.end) ?
+        0 :
+        1;
 }

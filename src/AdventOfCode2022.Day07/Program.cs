@@ -12,9 +12,15 @@ var totalDirSizes = dirs.ToDictionary(
     kvp => kvp.Key,
     kvp => dirSizes.Where(dir => dir.Key.StartsWith(kvp.Key)).Sum(dir => dir.Value));
 
-var puzzle1 = totalDirSizes.Values.Where(size => size <= 100000).Sum();
+var puzzle1 = totalDirSizes.Values.Where(size => size <= 100_000).Sum();
 
 Console.WriteLine($"Day 7 - Puzzle 1: {puzzle1}");
+
+var required = 30_000_000 - (70_000_000 - totalDirSizes["/"]);
+
+var puzzle2 = totalDirSizes.Values.Where(size => size >= required).Order().First();
+
+Console.WriteLine($"Day 7 - Puzzle 2: {puzzle2}");
 
 static IReadOnlyDictionary<string, Dictionary<string, int>> BuildDirs(
     string[] lines)

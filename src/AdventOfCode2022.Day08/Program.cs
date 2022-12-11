@@ -1,31 +1,47 @@
 ﻿var lines = File.ReadAllLines("input.txt");
 
+var size = lines.Length;
+
 var rows = lines.Select(line => line.ToCharArray()).ToArray();
 
-var puzzle1 = (rows.Length - 1) * 4; // edges are always visible
+var scores = new int[size][];
 
-for (var i = 1; i < rows.Length - 1; i++)
+var puzzle1 = (size - 1) * 4; // edges are always visible
+
+for (var i = 1; i < size - 1; i++)
 {
-    var row = rows[i];
+    scores[i] = new int[size];
 
-    for (var j = 1; j < row.Length - 1; j++)
+    for (var j = 1; j < size - 1; j++)
     {
-        if (IsVisible(rows, i, j))
+        var (isVisible, score) = CheckTree(i, j);
+
+        if (isVisible)
         {
             puzzle1++;
         }
+
+        scores[i][j] = score;
     }
 }
 
 Console.WriteLine($"Day 8 - Puzzle 1: {puzzle1}");
 
-static bool IsVisible(char[][] rows, int i, int j)
+var puzzle2 = scores[1..^1].SelectMany(s => s[1..^1]).Max();
+
+Console.WriteLine($"Day 8 - Puzzle 2: {puzzle2}");
+
+(bool, int) CheckTree(int i, int j)
 {
     var height = rows[i][j];
 
     var sides = 0;
 
-    for (var k = i - 1; k >= 0; k--)
+    var score = 1;
+
+    int k;
+
+    for (k = i - 1; k >= 0; k--)
     {
         if (rows[k][j] >= height)
         {
@@ -35,7 +51,9 @@ static bool IsVisible(char[][] rows, int i, int j)
         }
     }
 
-    for (var k = i + 1; k < rows.Length; k++)
+    score *= (i - k - (k == -1 ? 1 : 0));
+
+    for (k = i + 1; k < size; k++)
     {
         if (rows[k][j] >= height)
         {
@@ -45,7 +63,9 @@ static bool IsVisible(char[][] rows, int i, int j)
         }
     }
 
-    for (var k = j - 1; k >= 0; k--)
+    score *= (k - i - (k == size ? 1 : 0));
+
+    for (k = j - 1; k >= 0; k--)
     {
         if (rows[i][k] >= height)
         {
@@ -55,7 +75,9 @@ static bool IsVisible(char[][] rows, int i, int j)
         }
     }
 
-    for (var k = j + 1; k < rows[i].Length; k++)
+    score *= (j - k - (k == -1 ? 1 : 0));
+
+    for (k = j + 1; k < size; k++)
     {
         if (rows[i][k] >= height)
         {
@@ -65,5 +87,7 @@ static bool IsVisible(char[][] rows, int i, int j)
         }
     }
 
-    return sides < 4;
+    score *= (k - j - (k == size ? 1 : 0));
+
+    return (sides < 4, score);
 }

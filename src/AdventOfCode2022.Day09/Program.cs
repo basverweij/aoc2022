@@ -4,6 +4,10 @@ var puzzle1 = Simulate(lines, 2).Count;
 
 Console.WriteLine($"Day 9 - Puzzle 1: {puzzle1}");
 
+var puzzle2 = Simulate(lines, 10).Count;
+
+Console.WriteLine($"Day 9 - Puzzle 2: {puzzle2}");
+
 HashSet<(int, int)> Simulate(
     string[] lines,
     int length)

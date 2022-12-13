@@ -1,35 +1,49 @@
 ﻿var lines = File.ReadAllLines("input.txt");
 
-var head = (x: 0, y: 0);
-
-var tail = (x: 0, y: 0);
-
-var hits = new HashSet<(int, int)>()
-{
-    tail,
-};
-
-foreach (var line in lines)
-{
-    var parts = line.Split(' ');
-
-    var n = int.Parse(parts[1]);
-
-    for (var i = 0; i < n; i++)
-    {
-        head = MoveHead(parts[0][0]);
-
-        tail = MoveTail();
-
-        hits.Add(tail);
-    }
-}
-
-var puzzle1 = hits.Count;
+var puzzle1 = Simulate(lines, 2).Count;
 
 Console.WriteLine($"Day 9 - Puzzle 1: {puzzle1}");
 
-(int, int) MoveHead(char direction)
+HashSet<(int, int)> Simulate(
+    string[] lines,
+    int length)
+{
+    var knots = new (int x, int y)[length];
+
+    var hits = new HashSet<(int, int)>()
+    {
+        knots[^1],
+    };
+
+    foreach (var line in lines)
+    {
+        var parts = line.Split(' ');
+
+        var n = int.Parse(parts[1]);
+
+        for (var i = 0; i < n; i++)
+        {
+            knots[0] = MoveHead(
+                knots[0],
+                parts[0][0]);
+
+            for (var j = 1; j < knots.Length; j++)
+            {
+                knots[j] = MoveKnot(
+                    knots[j - 1],
+                    knots[j]);
+            }
+
+            hits.Add(knots[^1]);
+        }
+    }
+
+    return hits;
+}
+
+(int, int) MoveHead(
+    (int x, int y) head,
+    char direction)
     => direction switch
     {
         'L' => (head.x - 1, head.y),
@@ -39,15 +53,17 @@ Console.WriteLine($"Day 9 - Puzzle 1: {puzzle1}");
         _ => throw new ArgumentOutOfRangeException(nameof(direction)),
     };
 
-(int, int) MoveTail()
+(int, int) MoveKnot(
+    (int x, int y) previous,
+    (int x, int y) knot)
 {
-    var dx = head.x - tail.x;
+    var dx = previous.x - knot.x;
 
-    var dy = head.y - tail.y;
+    var dy = previous.y - knot.y;
 
     var threshold = dx * dx + dy * dy > 2 ? 0 : 1;
 
     return (
-        tail.x + (dx > threshold ? 1 : dx < -threshold ? -1 : 0),
-        tail.y + (dy > threshold ? 1 : dy < -threshold ? -1 : 0));
+        knot.x + (dx > threshold ? 1 : dx < -threshold ? -1 : 0),
+        knot.y + (dy > threshold ? 1 : dy < -threshold ? -1 : 0));
 }

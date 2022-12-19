@@ -2,33 +2,10 @@
 
 var monkeys = lines.Chunk(7).Select(Parse).ToArray();
 
-for (var round = 0; round < 20; round++)
-{
-    foreach (var monkey in monkeys)
-    {
-        while (monkey.Items.TryDequeue(out var level))
-        {
-            monkey.InspectionCount++;
-
-            level = ApplyOperation(
-                level,
-                monkey.Operation);
-
-            level /= 3;
-
-            var to = level % monkey.TestValue == 0 ?
-                monkey.MonkeyIfTrue :
-                monkey.MonkeyIfFalse;
-
-            monkeys[to].Items.Enqueue(level);
-        }
-    }
-}
-
-var puzzle1 = monkeys
-    .OrderByDescending(m => m.InspectionCount)
-    .Take(2)
-    .Aggregate(1, (a, m) => a * m.InspectionCount);
+var puzzle1 = PerformRounds(
+    monkeys,
+    20,
+    3);
 
 Console.WriteLine($"Day 10 - Puzzle 1: {puzzle1}");
 
@@ -76,16 +53,49 @@ int ApplyOperation(
     OperationTypes.Multiply => level * operation.Value,
 };
 
+long PerformRounds(
+    Monkey[] monkeys,
+    int rounds,
+    int worryLevelDivisor)
+{
+    var inspectionCounts = new long[monkeys.Length];
+
+    for (var round = 0; round < 20; round++)
+    {
+        foreach (var monkey in monkeys)
+        {
+            while (monkey.Items.TryDequeue(out var level))
+            {
+                inspectionCounts[monkey.Index]++;
+
+                level = ApplyOperation(
+                    level,
+                    monkey.Operation);
+
+                level /= 3;
+
+                var to = level % monkey.TestValue == 0 ?
+                    monkey.MonkeyIfTrue :
+                    monkey.MonkeyIfFalse;
+
+                monkeys[to].Items.Enqueue(level);
+            }
+        }
+    }
+
+    return inspectionCounts
+        .OrderDescending()
+        .Take(2)
+        .Aggregate(1L, (a, c) => a * c);
+}
+
 sealed record Monkey(
     int Index,
     Queue<int> Items,
     Operation Operation,
     int TestValue,
     int MonkeyIfTrue,
-    int MonkeyIfFalse)
-{
-    public int InspectionCount { get; set; }
-}
+    int MonkeyIfFalse);
 
 sealed record Operation(
     OperationTypes Type,

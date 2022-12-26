@@ -1,24 +1,33 @@
 ﻿var lines = File.ReadAllLines("input.txt");
 
-var monkeys = lines.Chunk(7).Select(Parse).ToArray();
+var monkeys1 = lines.Chunk(7).Select(Parse).ToArray();
 
 var puzzle1 = PerformRounds(
-    monkeys,
+    monkeys1,
     20,
     3);
 
 Console.WriteLine($"Day 10 - Puzzle 1: {puzzle1}");
 
+var monkeys2 = lines.Chunk(7).Select(Parse).ToArray();
+
+var puzzle2 = PerformRounds(
+    monkeys2,
+    10_000,
+    1);
+
+Console.WriteLine($"Day 10 - Puzzle 2: {puzzle2}");
+
 Monkey Parse(
-string[] lines)
+    string[] lines)
 {
     var index = int.Parse(lines[0][7..^1]);
 
-    var items = new Queue<int>(lines[1][18..].Split(", ").Select(int.Parse));
+    var items = new Queue<long>(lines[1][18..].Split(", ").Select(long.Parse));
 
     var operation = ParseOperation(lines[2][19..]);
 
-    var testValue = int.Parse(lines[3][21..]);
+    var testValue = long.Parse(lines[3][21..]);
 
     var monkeyIfTrue = int.Parse(lines[4][29..]);
 
@@ -38,29 +47,32 @@ Operation ParseOperation(
 => line switch
 {
     ['o', 'l', 'd', ' ', '*', ' ', 'o', 'l', 'd'] => new(OperationTypes.Square),
-    ['o', 'l', 'd', ' ', '+', ' ', ..] => new(OperationTypes.Add, int.Parse(line[6..])),
-    ['o', 'l', 'd', ' ', '*', ' ', ..] => new(OperationTypes.Multiply, int.Parse(line[6..])),
+    ['o', 'l', 'd', ' ', '+', ' ', ..] => new(OperationTypes.Add, long.Parse(line[6..])),
+    ['o', 'l', 'd', ' ', '*', ' ', ..] => new(OperationTypes.Multiply, long.Parse(line[6..])),
     _ => throw new ArgumentException(line, nameof(line)),
 };
 
-int ApplyOperation(
-    int level,
-    Operation operation)
+long ApplyOperation(
+    long level,
+    Operation operation,
+    long testValuesProduct)
 => operation.Type switch
 {
-    OperationTypes.Square => level * level,
+    OperationTypes.Square => (level * level) % testValuesProduct,
     OperationTypes.Add => level + operation.Value,
-    OperationTypes.Multiply => level * operation.Value,
+    OperationTypes.Multiply => (level * operation.Value) % testValuesProduct,
 };
 
 long PerformRounds(
     Monkey[] monkeys,
     int rounds,
-    int worryLevelDivisor)
+    long worryLevelDivisor)
 {
+    var testValuesProduct = monkeys.Aggregate(worryLevelDivisor, (a, m) => a * m.TestValue);
+
     var inspectionCounts = new long[monkeys.Length];
 
-    for (var round = 0; round < 20; round++)
+    for (var round = 0; round < rounds; round++)
     {
         foreach (var monkey in monkeys)
         {
@@ -70,9 +82,10 @@ long PerformRounds(
 
                 level = ApplyOperation(
                     level,
-                    monkey.Operation);
+                    monkey.Operation,
+                    testValuesProduct);
 
-                level /= 3;
+                level /= worryLevelDivisor;
 
                 var to = level % monkey.TestValue == 0 ?
                     monkey.MonkeyIfTrue :
@@ -91,15 +104,15 @@ long PerformRounds(
 
 sealed record Monkey(
     int Index,
-    Queue<int> Items,
+    Queue<long> Items,
     Operation Operation,
-    int TestValue,
+    long TestValue,
     int MonkeyIfTrue,
     int MonkeyIfFalse);
 
 sealed record Operation(
     OperationTypes Type,
-    int Value = 0);
+    long Value = 0);
 
 enum OperationTypes
 {

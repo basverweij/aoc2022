@@ -29,11 +29,19 @@ for (int y = 0; y < sizeY; y++)
     }
 }
 
-int puzzle1 = FindPath(map, sizeY, sizeX, start, end);
+int puzzle1 = FindPath(map, sizeX, sizeY, start, end);
 
 Console.WriteLine($"Day 12 - Puzzle 1: {puzzle1}");
 
-static int FindPath(char[][] map, int sizeY, int sizeX, (int x, int y) start, (int x, int y) end)
+var puzzle2 = map
+    .SelectMany((row, y) => row.Select((elevation, x) => (x, y, elevation)))
+    .Where(s => s.elevation == 'a')
+    .Select(s => FindPath(map, sizeX, sizeY, (s.x, s.y), end))
+    .Min();
+
+Console.WriteLine($"Day 12 - Puzzle 2: {puzzle2}");
+
+static int FindPath(char[][] map, int sizeX, int sizeY, (int x, int y) start, (int x, int y) end)
 {
     var steps = Enumerable.Range(0, sizeY).Select(_ => Enumerable.Repeat(int.MaxValue, sizeX).ToArray()).ToArray();
 

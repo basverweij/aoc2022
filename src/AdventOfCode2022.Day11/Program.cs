@@ -7,7 +7,7 @@ var puzzle1 = PerformRounds(
     20,
     3);
 
-Console.WriteLine($"Day 10 - Puzzle 1: {puzzle1}");
+Console.WriteLine($"Day 11 - Puzzle 1: {puzzle1}");
 
 var monkeys2 = lines.Chunk(7).Select(Parse).ToArray();
 
@@ -16,7 +16,7 @@ var puzzle2 = PerformRounds(
     10_000,
     1);
 
-Console.WriteLine($"Day 10 - Puzzle 2: {puzzle2}");
+Console.WriteLine($"Day 11 - Puzzle 2: {puzzle2}");
 
 Monkey Parse(
     string[] lines)

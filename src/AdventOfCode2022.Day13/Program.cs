@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices.Marshalling;
+﻿using AdventOfCode2022.Day13;
 
 var lines = File.ReadAllLines("input.txt");
 
@@ -7,12 +7,11 @@ var pairs = lines
     .Select(c => c.Take(2).Select(ParsePacket).ToArray())
     .ToArray();
 
-foreach (var pair in pairs)
-{
-    Console.WriteLine(pair[0]);
-    Console.WriteLine(pair[1]);
-    Console.WriteLine();
-}
+var puzzle1 = pairs
+    .Select((pair, i) => IsInRightOrder(pair[0], pair[1]) is true ? i + 1 : 0)
+    .Sum();
+
+Console.WriteLine($"Day 13 - Puzzle 1: {puzzle1}");
 
 Item ParsePacket(
     string line)
@@ -80,35 +79,75 @@ ReadOnlySpan<char> ParseItem(
         span[i..]);
 }
 
-sealed class Item
+bool? IsInRightOrder(
+    Item left,
+    Item right)
 {
-    public readonly bool IsList;
-
-    public readonly int Value;
-
-    public readonly Item? Parent;
-
-    public readonly List<Item> List = new();
-
-    public Item(
-        int value)
+    if (!left.IsList && !right.IsList)
     {
-        IsList = false;
+        if (left.Value < right.Value)
+        {
+            return true;
+        }
 
-        Value = value;
+        if (left.Value > right.Value)
+        {
+            return false;
+        }
+
+        return null;
     }
 
-    public Item(Item? parent)
+    if (!left.IsList && right.IsList)
     {
-        IsList = true;
+        left = new(left)
+        {
+            List =
+            {
+                left,
+            },
+        };
 
-        Parent = parent;
+        return IsInRightOrder(
+            left,
+            right);
     }
 
-    public override string ToString()
+    if (left.IsList && !right.IsList)
     {
-        return IsList ?
-            $"[{string.Join(",", List)}]" :
-            Value.ToString();
+        right = new(right)
+        {
+            List =
+            {
+                right,
+            },
+        };
+
+        return IsInRightOrder(
+            left,
+            right);
     }
+
+    // both are lists
+
+    for (var i = 0; i < left.List.Count; i++)
+    {
+        if (i >= right.List.Count)
+        {
+            return false;
+        }
+
+        var isInRightOrder = IsInRightOrder(
+            left.List[i],
+            right.List[i]);
+
+        if (isInRightOrder != null)
+        {
+            return isInRightOrder;
+        }
+    }
+
+    return left.List.Count == right.List.Count ?
+        null :
+        true;
 }

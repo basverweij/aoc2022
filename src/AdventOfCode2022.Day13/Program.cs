@@ -7,11 +7,29 @@ var pairs = lines
     .Select(c => c.Take(2).Select(ParsePacket).ToArray())
     .ToArray();
 
+var comparer = new ItemComparer();
+
 var puzzle1 = pairs
-    .Select((pair, i) => IsInRightOrder(pair[0], pair[1]) is true ? i + 1 : 0)
+    .Select((pair, i) => comparer.Compare(pair[0], pair[1]) == -1 ? i + 1 : 0)
     .Sum();
 
 Console.WriteLine($"Day 13 - Puzzle 1: {puzzle1}");
+
+var divider1 = BuildDivider(2);
+
+var divider2 = BuildDivider(6);
+
+var packets = pairs
+    .SelectMany(pair => pair)
+    .Concat(new[] { divider1, divider2 })
+    .Order(new ItemComparer())
+    .ToList();
+
+var puzzle2 =
+    (packets.IndexOf(divider1) + 1) *
+    (packets.IndexOf(divider2) + 1);
+
+Console.WriteLine($"Day 13 - Puzzle 2: {puzzle2}");
 
 Item ParsePacket(
     string line)
@@ -79,75 +97,20 @@ ReadOnlySpan<char> ParseItem(
         span[i..]);
 }
 
-bool? IsInRightOrder(
-    Item left,
-    Item right)
+static Item BuildDivider(
+    int value)
 {
-    if (!left.IsList && !right.IsList)
+    return new Item(null)
     {
-        if (left.Value < right.Value)
+        List =
         {
-            return true;
-        }
-
-        if (left.Value > right.Value)
-        {
-            return false;
-        }
-
-        return null;
-    }
-
-    if (!left.IsList && right.IsList)
-    {
-        left = new(left)
-        {
-            List =
+            new(null)
             {
-                left,
+                List =
+                {
+                    new Item(value),
+                },
             },
-        };
-
-        return IsInRightOrder(
-            left,
-            right);
-    }
-
-    if (left.IsList && !right.IsList)
-    {
-        right = new(right)
-        {
-            List =
-            {
-                right,
-            },
-        };
-
-        return IsInRightOrder(
-            left,
-            right);
-    }
-
-    // both are lists
-
-    for (var i = 0; i < left.List.Count; i++)
-    {
-        if (i >= right.List.Count)
-        {
-            return false;
-        }
-
-        var isInRightOrder = IsInRightOrder(
-            left.List[i],
-            right.List[i]);
-
-        if (isInRightOrder != null)
-        {
-            return isInRightOrder;
-        }
-    }
-
-    return left.List.Count == right.List.Count ?
-        null :
-        true;
+        },
+    };
 }

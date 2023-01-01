@@ -1,12 +1,18 @@
 ﻿var lines = File.ReadAllLines("input.txt");
 
-var paths = lines.Select(ParseLine);
+var paths = lines.Select(ParseLine).ToArray();
 
 var map = BuildMap(paths);
 
 var puzzle1 = SettleSand(map);
 
 Console.WriteLine($"Day 14 - Puzzle 1: {puzzle1}");
+
+map = BuildMap(paths.Concat(BuildFloor(paths)));
+
+var puzzle2 = SettleSand(map);
+
+Console.WriteLine($"Day 14 - Puzzle 2: {puzzle2}");
 
 static (int x, int y)[] ParseLine(
     string line)
@@ -17,6 +23,14 @@ static (int x, int y)[] ParseLine(
         .Select(s => s.Split(','))
         .Select(s => (int.Parse(s[0]), int.Parse(s[1])))
         .ToArray();
+}
+
+static (int x, int y)[][] BuildFloor(
+    (int x, int y)[][] paths)
+{
+    var floorY = paths.SelectMany(p => p).Select(s => s.y).Max() + 2;
+
+    return new[] { new[] { (500 - floorY, floorY), (500 + floorY, floorY) } };
 }
 
 static HashSet<(int x, int y)> BuildMap(
@@ -67,6 +81,13 @@ static int SettleSand(
 
     for (var settled = 0; ; settled++)
     {
+        if (map.Contains(source))
+        {
+            // source blocked
+
+            return settled;
+        }
+
         for (var sand = source; ;)
         {
             if (TrySettleSand(
